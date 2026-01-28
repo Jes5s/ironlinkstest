@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Admin Profile | IronLinks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .admin-badge {
+      background: #111;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .edit-box, .upload-box {
+      margin-top: 15px;
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .gallery-grid div {
+      position: relative;
+    }
+
+    .gallery-grid img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .remove-btn {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: red;
+      cursor: pointer;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Iron <span>works</span></h1>
+  <nav>
+    <a href="index.html">view public page</a> |
+    <a href="admin.html">admin profile</a> |
+    <a href="admin_booking.html">Schedules</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="hompage_photos/welding.webp" alt="Welding Work">
+
+  <span class="admin-badge">ADMIN MODE</span>
+
+  <blockquote>
+    “We combine traditional iron craftsmanship 
+    with modern technology to bring your custom designs to life.”
+  </blockquote>
+</section>
+
+<!-- GALLERY MANAGEMENT -->
+<section class="gallery">
+  <h2>Gallery Management</h2>
+
+  <!-- GATE -->
+  <h3>Gate</h3>
+  <div class="gallery-grid" id="Gate"></div>
+
+  <div class="upload-box">
+    <input type="file" accept="image/*" onchange="uploadImage(event, 'Gate')">
+  </div>
+
+  <!-- GRILL -->
+  <h3>Grill</h3>
+  <div class="gallery-grid" id="Grill"></div>
+
+  <div class="upload-box">
+    <input type="file" accept="image/*" onchange="uploadImage(event, 'Grill')">
+  </div>
+
+  <!-- RAILING -->
+  <h3>Railing</h3>
+  <div class="gallery-grid" id="Railing"></div>
+
+  <div class="upload-box">
+    <input type="file" accept="image/*" onchange="uploadImage(event, 'Railing')">
+  </div>
+</section>
+
+<footer>
+  <p class="footer-note">ADMIN MODE — changes affect live site</p>
+</footer>
+
+<script>
+async function loadGallery() {
+  const res = await fetch('/gallery');
+  const data = await res.json();
+
+  ['Gate', 'Grill', 'Railing'].forEach(cat => {
+    document.getElementById(cat).innerHTML = '';
+  });
+
+  data.forEach(item => {
+    const wrapper = document.createElement('div');
+
+    wrapper.innerHTML = `
+      <img src="${item.image_url}">
+      <span class="remove-btn" onclick="deleteImage(${item.id})">Remove</span>
+    `;
+
+    document.getElementById(item.category).appendChild(wrapper);
+  });
+}
+
+async function uploadImage(event, category) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('category', category);
+  formData.append('image', file);
+
+  await fetch('/gallery', {
+    method: 'POST',
+    body: formData
+  });
+
+  event.target.value = '';
+  loadGallery();
+}
+
+async function deleteImage(id) {
+  if (!confirm('Remove this image?')) return;
+
+  await fetch(`/gallery/${id}`, { method: 'DELETE' });
+  loadGallery();
+}
+
+loadGallery();
+</script>
+
+</body>
+</html>

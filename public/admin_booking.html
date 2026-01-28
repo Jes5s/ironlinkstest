@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Bookings | IronLinks</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      background: #f5f5f5;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .admin-container h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .admin-container p {
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    thead {
+      background: #111;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f6f6f6;
+    }
+
+    tbody tr:hover {
+      background: #eaeaea;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .error-row {
+      text-align: center;
+      color: red;
+      font-weight: 600;
+    }
+
+    .img-thumb {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Iron <span>works</span> Admin Booking</h1>
+  <nav>
+    <a href="/">Home</a> |
+    <a href="/admin_booking.html">Bookings</a> |
+    <a href="/admin.html">Gallery</a>
+  </nav>
+</header>
+
+<section class="admin-container">
+  <h1>Bookings</h1>
+  <p>Below is the list of customer booking requests stored in the database.</p>
+
+  <div class="table-wrapper">
+    <table id="bookings-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Request</th>
+          <th>Created At</th>
+          <th>Reference Image</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data inserted here -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+async function loadBookings() {
+  const tbody = document.querySelector('#bookings-table tbody');
+  tbody.innerHTML = '';
+
+  try {
+    const res = await fetch('/bookings');
+    if (!res.ok) throw new Error('Failed to fetch bookings');
+
+    const data = await res.json();
+
+    if (!data.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" class="error-row">No bookings found</td>
+        </tr>
+      `;
+      return;
+    }
+
+    data.forEach(b => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${b.id}</td>
+        <td>${b.name}</td>
+        <td>${b.email}</td>
+        <td>${b.phone}</td>
+        <td>${b.date}</td>
+        <td>${b.time || ''}</td>
+        <td>${b.request || ''}</td>
+        <td>${new Date(b.created_at).toLocaleString()}</td>
+        <td>
+          ${
+            b.reference_image_url
+              ? `<a href="${b.reference_image_url}" target="_blank">
+                   <img src="${b.reference_image_url}" class="img-thumb" />
+                 </a>`
+              : '—'
+          }
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="error-row">Failed to load bookings</td>
+      </tr>
+    `;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadBookings);
+</script>
+
+</body>
+</html>

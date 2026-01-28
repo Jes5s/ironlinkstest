@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Launching AR…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:system-ui,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#111;color:#eee;padding:16px}
+    .box{max-width:720px;text-align:center}
+    .error{color:#ff6b6b}
+    pre{white-space:pre-wrap;text-align:left;color:#ddd;background:#0f0f0f;padding:10px;border-radius:6px;font-size:13px;overflow:auto;max-height:260px}
+    .btn{display:inline-block;margin-top:12px;padding:8px 14px;background:#1976d2;color:#fff;border-radius:8px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="box" id="box">
+    <h2>Launching AR Viewer…</h2>
+    <p id="info">Checking model files…</p>
+  </div>
+
+<script>
+(async function(){
+  // EDIT THIS — registry of your models (keys are case-sensitive)
+  const MODELS = {
+    "wall": { glb: "/models/wall.glb", usdz: "/models/wall.usdz" },
+    // add others: "grill_white": { glb: "/models/grill_white.glb", usdz: "/models/grill_white.usdz" }
+  };
+
+  function getQueryParam(name, fallback) {
+    const p = new URLSearchParams(location.search);
+    return p.get(name) || fallback;
+  }
+
+  const modelKey = getQueryParam('model','wall');
+  const model = MODELS[modelKey];
+  const box = document.getElementById('box');
+  const info = document.getElementById('info');
+
+  if (!model) {
+    box.innerHTML = `<h2 class="error">Unknown model: ${modelKey}</h2>
+      <p>Ensure the model key exists in the redirect <code>MODELS</code> registry.</p>`;
+    return;
+  }
+
+  const origin = location.origin;
+  const glbUrl = origin + model.glb;
+  const usdzUrl = origin + model.usdz;
+
+  info.innerText = `Verifying: ${modelKey}\nGLB: ${glbUrl}\nUSDZ: ${usdzUrl}`;
+
+  // HEAD check helper — returns {ok, status, contentType}
+  async function headCheck(url) {
+    try {
+      const resp = await fetch(url, { method: 'HEAD' , cache:'no-store' });
+      if (!resp) return { ok:false, status:'no-response' };
+      const ct = resp.headers.get('content-type') || '';
+      return { ok: resp.ok, status: resp.status, contentType: ct, headers:Object.fromEntries(resp.headers) };
+    } catch(err) {
+      return { ok:false, status: err.message || 'fetch-error' };
+    }
+  }
+
+  // Attempt to check GLB first
+  const glbHead = await headCheck(glbUrl);
+  if (!glbHead.ok) {
+    box.innerHTML = `<h2 class="error">GLB not reachable</h2>
+      <p>Scene Viewer will not open because the GLB URL failed the HEAD check.</p>
+      <pre>GLB: ${glbUrl}
+Status: ${glbHead.status}
+Content-Type: ${glbHead.contentType || 'unknown'}</pre>
+      <p>Use the browser console or server logs to fix path, CORS or hosting issues.</p>`;
+    return;
+  }
+
+  // Optionally check USDZ as well (for iOS)
+  const usdzHead = await headCheck(usdzUrl);
+  if (!usdzHead.ok) {
+    // still allow Android, but warn
+    console.warn('USDZ HEAD check failed', usdzHead);
+    // we proceed but show warning below
+  }
+
+  // Device detection
+  // Device detection (Desktop-View–safe)
+const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+const isAndroid = /Android/i.test(ua);
+
+// iOS detection that survives "Request Desktop Website"
+const isIOSUA = /iPad|iPhone|iPod/i.test(ua);
+const isTouchDevice =
+  ('ontouchstart' in window) ||
+  (navigator.maxTouchPoints > 1);
+
+// iPad / iPhone in Desktop Mode reports "Macintosh"
+const isLikelyIOS = isIOSUA || (isTouchDevice && /Macintosh/i.test(ua));
+
+  // Helpful debug output (visible briefly)
+  console.log('GLB head', glbHead);
+  console.log('USDZ head', usdzHead);
+
+  // iOS: try using an <a rel="ar"> and trigger click programmatically (works more reliably)
+  if (isLikelyIOS) {
+    info.innerText = 'iOS device detected — opening Quick Look...';
+    // create anchor
+    const a = document.createElement('a');
+    a.setAttribute('rel','ar');
+    a.href = usdzUrl;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+
+    // attempt to programmatically click (some Safari builds allow this to open Quick Look)
+    try {
+      a.click();
+      // fallback: also replace location after a small delay
+      setTimeout(()=>{ window.location.replace(usdzUrl); }, 900);
+    } catch(e) {
+      // fallback direct replace
+      window.location.replace(usdzUrl);
+    }
+    return;
+  }
+
+  // Android: build Scene Viewer intent (percent encode carefully)
+  if (isAndroid) {
+    info.innerText = 'Android device detected — opening Scene Viewer...';
+    // include a title param and fallback url
+    const title = encodeURIComponent('IronLinks Model - ' + modelKey);
+    const file = encodeURIComponent(glbUrl);
+    const fallback = encodeURIComponent(glbUrl); // fallback to raw GLB if needed
+    // Intent format
+    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${file}&title=${title}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end`;
+
+    // final step: navigate
+    window.location.replace(intent);
+
+    // After a timeout, show a link so the user can manually open the GLB (debug)
+    setTimeout(()=>{
+      box.innerHTML = `<h3 class="error">Scene Viewer did not start</h3>
+        <p>If Scene Viewer fails, open the GLB directly or view console for errors.</p>
+        <p><a class="btn" href="${glbUrl}">Open GLB in browser</a></p>`;
+    }, 3000);
+
+    return;
+  }
+
+  // Desktop fallback
+  box.innerHTML = `<h2>AR not supported</h2>
+      <p>Open these files on a mobile device:</p>
+      <pre>GLB: ${glbUrl}\nUSDZ: ${usdzUrl}</pre>
+      <p><a class="btn" href="${glbUrl}">Download GLB</a> <a class="btn" href="${usdzUrl}">Download USDZ</a></p>`;
+})();
+</script>
+</body>
+</html>

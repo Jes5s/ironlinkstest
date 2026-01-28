@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Consultation | IronLinks</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Iron <span>works</span></h1>
+  <nav>
+    <a href="index.html">about us</a> |
+    <a href="products.html">products</a> |
+    <a href="book.html">book now</a> |
+    <a href="#contact">contact</a>
+  </nav>
+</header>
+
+<section class="book-section">
+  <h2>Book a Consultation</h2>
+
+  <form id="bookingForm" class="book-form" enctype="multipart/form-data">
+
+    <!-- Name: letters, spaces, and dots (for middle initials) -->
+    <input
+      type="text"
+      name="name"
+      placeholder="Full Name"
+      pattern="[A-Za-z.\s]+"
+      title="Letters, spaces, and dots only (e.g., Juan D. Cruz)"
+      required
+    >
+
+    <!-- Email -->
+    <input type="email" name="email" placeholder="Email" required>
+
+    <!-- Phone: 11 digits starting with 09 -->
+    <input
+      type="tel"
+      name="phone"
+      placeholder="Phone Number (09XXXXXXXXX)"
+      pattern="09[0-9]{9}"
+      title="11 digits starting with 09"
+      required
+    >
+
+    <!-- Date -->
+    <input type="date" name="date" id="dateInput" required>
+
+    <!-- Time -->
+    <input type="time" name="time" required>
+
+    <!-- Additional request -->
+    <textarea name="request" placeholder="Additional Details"></textarea>
+
+    <!-- Optional image -->
+    <label>
+      Upload reference image (optional)
+      <input type="file" name="reference_image" accept="image/*">
+    </label>
+
+    <button type="submit">Submit Booking</button>
+  </form>
+
+  <p id="statusMessage" style="color:red;"></p>
+</section>
+
+<script>
+  // Prevent past dates
+  const dateInput = document.getElementById('dateInput');
+  dateInput.min = new Date().toISOString().split('T')[0];
+
+  const form = document.getElementById('bookingForm');
+  const statusMessage = document.getElementById('statusMessage');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusMessage.textContent = '';
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch('/book', {
+        method: 'POST',
+        body: formData
+      });
+
+      const text = await res.text();
+      if (!res.ok) throw new Error(text);
+
+      alert("Booking successful!");
+      form.reset();
+    } catch (err) {
+      statusMessage.textContent = err.message;
+    }
+  });
+</script>
+
+<footer id="contact">
+  <div class="footer-container">
+    <h2>Contact Us</h2>
+    <p>📍 Address</p>
+    <p>📱 Phone Number</p>
+    <p>📧 Email</p>
+    <p class="footer-note">© 2025 IronLinks. All Rights Reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>

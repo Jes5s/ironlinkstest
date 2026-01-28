@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Finder | IronLinks</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+
+  <!-- Google Model Viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+
+<body>
+
+
+<header>
+  <h1>Iron <span>works</span></h1>
+  <nav>
+    <a href="index.html">about us</a> |
+    <a href="products.html">products</a> |
+    <a href="book.html">book now</a> |
+    <a href="#contact">contact</a>
+  </nav>
+</header>
+
+
+<section class="product-section">
+  <h2>Design Finder</h2>
+    
+    <div class="product-nav">
+      <button onclick="location.href='products.html'">Gates</button>
+      <button onclick="location.href='product_grills.html'">Grills</button>
+      <button onclick="location.href='product_railings.html'">Railings</button>
+      <button class="active" onclick="location.href='product_finder.html'">Design Finder</button>
+    </div>   
+
+  <p class="section-desc">
+    Upload a sketch or describe your preferred design,<br>
+    IronLinks will find the closest matching gate design.<br><br>
+  </p>
+
+  <div class="product-container">
+
+    <!-- Product Image and 3D/AR View -->
+    <div class="product-image">
+
+      <!-- Placeholder 3D Model (hidden by default) -->
+      <model-viewer
+        id="finder3D"
+        src="models/wall.glb"
+        alt="Design Finder 3D Result"
+        camera-controls
+        auto-rotate
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        style="display: none; width: 100%; height: 400px;"
+      ></model-viewer>
+
+      <p id="placeholderText">
+  🧩 No design generated yet<br><br>
+  Upload a sketch or describe your idea to preview a matching design.
+</p>
+
+    </div>
+
+    <!-- Design Input Section -->
+    <div class="product-details">
+
+      <h3>Input Your Design</h3>
+
+      <label>Upload a sketch (optional)</label>
+      <input type="file" id="sketchUpload" accept="image/*">
+
+      <label>Describe your design</label>
+      <textarea id="designText" placeholder="Example: double swing iron gate with floral patterns..."></textarea>
+
+      <button class="quote-btn" id="findDesign">Find Closest Design</button>
+
+      <p class="future-note">
+        ⚠️ Currently uses a placeholder 3D model.  
+        <!--AI-based matching will be implemented in a future update.-->
+      </p>
+
+      <div class="quote-box">
+          <h4>Start Your Custom Project</h4>
+          <p>Schedule a free consultation to discuss your custom gate, grill, or railing design.</p>
+          <a href="book.html" class="quote-btn">Request a Quote</a>
+        </div>
+    </div>
+    
+  </div>
+</section>
+
+<script>
+  const findBtn = document.getElementById("findDesign");
+  const model3D = document.getElementById("finder3D");
+  const placeholderText = document.getElementById("placeholderText");
+
+  findBtn.addEventListener("click", () => {
+    placeholderText.style.display = "none";
+    model3D.style.display = "block";
+  });
+</script>
+
+<footer id="contact">
+  <div class="footer-container">
+    <h2>Contact Us</h2>
+    <p>📍 Address</p>
+    <p>📱 Phone Number</p>
+    <p>📧 Email</p>
+
+    <div class="social-links">
+      <a href="#">Facebook</a> |
+      <a href="#">Messenger</a>
+    </div>
+
+    <p class="footer-note">© 2025 IronLinks. All Rights Reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>

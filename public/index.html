@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Basic meta -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>IronLinks | Iron Works</title>
+
+  <!-- SEO / Social -->
+  <meta name="description"
+    content="IronLinks — custom iron gates, grills, railings and consultation for family-run ironwork businesses.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap"
+    rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Iron <span>works</span></h1>
+    <nav>
+      <a href="#about">about us</a> |
+      <a href="products.html">products</a> |
+      <a href="book.html">book now</a> |
+      <a href="#contact">contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img src="hompage_photos/welding.webp" alt="Iron welding work">
+    <blockquote>
+      “We combine traditional iron craftsmanship
+      with modern technology to bring your custom designs to life.”
+    </blockquote>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="about">
+    <h2>About Us</h2>
+
+    <p>
+      <strong>IronLinks</strong> is a modern platform that connects customers with skilled local iron workers.
+      We combine traditional craftsmanship with new technology to make custom iron designs easier to plan,
+      view, and order online.
+    </p>
+
+    <p>
+      Our goal is to help small ironwork businesses grow through digital innovation while promoting
+      sustainable and smart city development.
+    </p>
+
+    <h3>🌐 Our SDG Commitment</h3>
+    <ul>
+      <li><b>SDG 8:</b> Decent Work and Economic Growth</li>
+      <li><b>SDG 9:</b> Industry, Innovation, and Infrastructure</li>
+      <li><b>SDG 11:</b> Sustainable Cities and Communities</li>
+    </ul>
+  </section>
+
+  <!-- GALLERY (DYNAMIC) -->
+  <section class="gallery" id="products">
+    <h2>Gallery</h2>
+
+    <!-- Dynamic content goes here -->
+    <div id="dynamicGallery"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    <div class="footer-container">
+      <h2>Contact Us</h2>
+      <p>📍 Address</p>
+      <p>📱 Phone Number</p>
+      <p>📧 Email</p>
+
+      <div class="social-links">
+        <a href="#">Facebook</a> |
+        <a href="#">Messenger</a>
+      </div>
+
+      <p class="footer-note">© 2025 IronLinks. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC GALLERY SCRIPT -->
+  <script>
+    async function loadDynamicGallery() {
+      try {
+        const res = await fetch('/gallery');
+        const data = await res.json();
+
+        const container = document.getElementById('dynamicGallery');
+        container.innerHTML = '';
+
+        if (!data.length) {
+          container.innerHTML = '<p>No gallery images available.</p>';
+          return;
+        }
+
+        // Group by category
+        const grouped = {};
+        data.forEach(item => {
+          if (!grouped[item.category]) {
+            grouped[item.category] = [];
+          }
+          grouped[item.category].push(item.image_url);
+        });
+
+        // Render gallery
+        Object.keys(grouped).forEach(category => {
+          const title = document.createElement('h3');
+          title.textContent = category;
+
+          const grid = document.createElement('div');
+          grid.className = 'gallery-grid';
+
+          grouped[category].forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = `${category} design`;
+            grid.appendChild(img);
+          });
+
+          container.appendChild(title);
+          container.appendChild(grid);
+        });
+
+      } catch (err) {
+        console.error('Failed to load gallery:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDynamicGallery);
+  </script>
+
+</body>
+</html>

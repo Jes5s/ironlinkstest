@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Products | IronLinks</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+
+  <!-- Google Model Viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Iron <span>works</span></h1>
+    <nav>
+      <a href="index.html">about us</a> |
+      <a href="products.html">products</a> |
+      <a href="book.html">book now</a> |
+      <a href="#contact">contact</a>
+    </nav>
+  </header>
+
+  <!-- Product Section -->
+  <section class="product-section">
+    <h2>Our Products</h2>
+    <h3>Railings</h3>
+    
+    <div class="product-nav">
+      <button onclick="location.href='products.html'">Gates</button>
+      <button onclick="location.href='product_grills.html'">Grills</button>
+      <button class="active" onclick="location.href='product_railings.html'">Railings</button>
+      <button onclick="location.href='product_finder.html'">Design Finder</button>
+    </div>   
+         
+    <div class="product-container">
+
+      <!-- Product Image and 3D/AR View -->
+      <div class="product-image">
+
+        <!-- Static image (default view) -->
+        <img src="hompage_photos/railings1.1.webp" alt="Iron Railings" id="mainImage">
+
+        <!-- 3D & AR viewer -->
+        <model-viewer
+          id="gate3D"
+          src="models/wall.glb"
+          ios-src="models/wall.usdz"
+          alt="Iron Gate 3D Model"
+          auto-rotate
+          camera-controls
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          style="display: none;"
+        ></model-viewer>
+
+        <div class="product-icons">
+          <button id="view3d">3D View</button>
+          <button id="viewQR">QR Code</button>
+        </div>
+
+        <p class="ar-notice">📱 Tap “View in AR” (on mobile) to place it in your space!</p>
+      </div>
+
+      <!-- Product Details -->
+      <div class="product-details">
+        <h3>Balcony Railing Display</h3>
+        
+        <h4>Details</h4>
+        <ul>
+          <li><strong>Price Range:</strong> ₱12,000 – ₱22,000 per meter</li>
+          <li><strong>Material:</strong> Wrought Iron</li>
+          <li><strong>Finish:</strong> PVD</li>
+          <li><strong>Welding:</strong> Fully Welded Joints</li>
+          <li><strong>Customization:</strong> Color, material, finish and pattern available</li>
+        </ul>
+
+        <h4>Design Variations</h4>
+        <div id="variationOptions" class="options">
+          <button class="option-btn active" data-variation="classic">Wrought Iron</button>
+          <button class="option-btn" data-variation="double">Stainless</button>
+        </div>
+
+        <div class="quote-box">
+          <h4>Start Your Custom Project</h4>
+          <p>Schedule a free consultation to discuss your custom gate, grill, or railing design.</p>
+          <a href="book.html" class="quote-btn">Request a Quote</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <h3>Scan to View in AR</h3>
+      <img src="qr.png" alt="QR Code" id="qrImage">
+      <br><br>
+      <button id="closeQR">Close</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================
+       3D VIEW TOGGLE
+       ============================ */
+    const view3dBtn = document.getElementById("view3d");
+    const model3D = document.getElementById("gate3D");
+    const mainImage = document.getElementById("mainImage");
+
+    view3dBtn.addEventListener("click", () => {
+      const isHidden = model3D.style.display === "none" || model3D.style.display === "";
+      model3D.style.display = isHidden ? "block" : "none";
+      mainImage.style.display = isHidden ? "none" : "block";
+      view3dBtn.textContent = isHidden ? "Image View" : "3D View";
+    });
+
+    /* ============================
+       QR MODAL
+       ============================ */
+    const viewQRBtn = document.getElementById("viewQR");
+    const qrModal = document.getElementById("qrModal");
+    const closeQRBtn = document.getElementById("closeQR");
+
+    viewQRBtn.addEventListener("click", () => {
+      qrModal.style.display = "flex";
+    });
+
+    closeQRBtn.addEventListener("click", () => {
+      qrModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === qrModal) qrModal.style.display = "none";
+    });
+
+    /* ============================
+       DESIGN VARIATION SWITCHER
+       ============================ */
+
+    const variations = {
+      classic: {
+        image: "hompage_photos/railings1.1.webp",
+        glb: "models/wall.glb",
+        usdz: "models/wall.usdz"
+      },
+      double: {
+        image: "hompage_photos/railings1.2.webp",
+        glb: "models/wall2.glb",
+        usdz: "models/wall.usdz"
+      },
+    };
+
+    const variationButtons = document.querySelectorAll(".option-btn");
+
+    variationButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+
+        // active button UI
+        variationButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const selected = btn.dataset.variation;
+        const data = variations[selected];
+
+        // reset to image view
+        model3D.style.display = "none";
+        mainImage.style.display = "block";
+        view3dBtn.textContent = "3D View";
+
+        // update image
+        mainImage.src = data.image;
+
+        // update 3D / AR model
+        model3D.setAttribute("src", data.glb);
+        model3D.setAttribute("ios-src", data.usdz);
+      });
+    });
+  </script>
+
+  <footer id="contact">
+    <div class="footer-container">
+      <h2>Contact Us</h2>
+      <p>📍 Address</p>
+      <p>📱 Phone Number</p>
+      <p>📧 email</p>
+  
+      <div class="social-links">
+        <a href="#">Facebook</a> |
+        <a href="#">Messenger</a>
+      </div>
+  
+      <p class="footer-note">© 2025 IronLinks. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
