@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IronLinks AR Preview</title>
+
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+
+<body>
+  <a-scene
+    mindar-image="imageTargetSrc: markers/window.mind;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true">
+
+    <a-assets>
+      <a-asset-item id="gate" src="window.glb"></a-asset-item>
+    </a-assets>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model
+        src="#gate"
+        scale="0.4 0.4 0.4"
+        position="0 0 0">
+      </a-gltf-model>
+    </a-entity>
+
+    <a-camera></a-camera>
+  </a-scene>
+</body>
+</html>
