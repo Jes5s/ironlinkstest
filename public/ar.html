@@ -4,33 +4,89 @@
   <meta charset="UTF-8" />
   <title>IronLinks AR Preview</title>
 
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- MindAR (only used if AR is enabled) -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+
+    #arButton {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 22px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 10;
+    }
   </style>
 </head>
 
 <body>
-  <a-scene
-    mindar-image="imageTargetSrc: markers/window.mind;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true">
 
-    <a-assets>
-      <a-asset-item id="gate" src="window.glb"></a-asset-item>
-    </a-assets>
+<button id="arButton">View in AR</button>
 
-    <a-entity mindar-image-target="targetIndex: 0">
-      <a-gltf-model
-        src="#gate"
-        scale="0.4 0.4 0.4"
-        position="0 0 0">
-      </a-gltf-model>
-    </a-entity>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const isAR = params.get("ar") === "true";
 
-    <a-camera></a-camera>
-  </a-scene>
+  document.getElementById("arButton").onclick = () => {
+    window.location.href = "ar.html?ar=true";
+  };
+
+  if (!isAR) {
+    // 👉 NORMAL 3D VIEWER (NO AR)
+    document.write(`
+      <a-scene background="color: #ECECEC">
+        <a-assets>
+          <a-asset-item id="model" src="models/window.glb"></a-asset-item>
+        </a-assets>
+
+        <a-gltf-model 
+          src="#model"
+          position="0 1.5 -3"
+          scale="0.3 0.3 0.3"
+          rotation="0 180 0">
+        </a-gltf-model>
+
+        <a-camera position="0 1.6 0"></a-camera>
+      </a-scene>
+    `);
+  } else {
+    // 👉 AR MODE
+    document.getElementById("arButton").style.display = "none";
+
+    document.write(`
+      <a-scene
+        mindar-image="imageTargetSrc: markers/targets.mind;"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: true">
+
+        <a-assets>
+          <a-asset-item id="model" src="models/window.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+          <a-gltf-model 
+            src="#model"
+            position="0 0 0"
+            scale="0.3 0.3 0.3">
+          </a-gltf-model>
+        </a-entity>
+
+        <a-camera></a-camera>
+      </a-scene>
+    `);
+  }
+</script>
+
 </body>
 </html>
